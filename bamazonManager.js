@@ -46,6 +46,7 @@ function actionHandler(str) {
             break;
         case "Add New Product":
             console.log("Adding new product...");
+            addNewItem();
             break;
         default:
             console.log("Thanks!");
@@ -62,7 +63,7 @@ function viewProducts() {
         console.log("Item ID | Product Name | Price \n");
 
         for (i = 0; i < results.length; i++) {
-            console.log(results[i].item_id + " | " + results[i].product_name + " | " +  results[i].department_name + " | " + results[i].price + " | " + results[i].stock_quantity);
+            console.log(results[i].item_id + " | " + results[i].product_name + " | " + results[i].department_name + " | " + results[i].price + " | " + results[i].stock_quantity);
         };
         initialPrompt();
 
@@ -77,7 +78,7 @@ function viewLowInv() {
         console.log("Item ID | Product Name | Price \n");
 
         for (i = 0; i < results.length; i++) {
-            console.log(results[i].item_id + " | " + results[i].product_name + " | " +  results[i].department_name + " | " + results[i].price + " | " + results[i].stock_quantity);
+            console.log(results[i].item_id + " | " + results[i].product_name + " | " + results[i].department_name + " | " + results[i].price + " | " + results[i].stock_quantity);
         };
         initialPrompt();
 
@@ -87,33 +88,33 @@ function viewLowInv() {
 
 function inputStockAmt() {
     inquirer
-    .prompt([{
-        type: "input",
-        name: "inputID",
-        message: "What is the ID of the item?",
-    },
-    {
-        type: "input",
-        name: "inputAmount",
-        message: "How many would you like to add?",
-    },
-    ])
-    .then(function (response) {
-        console.log("Updating inventory...");
-        var prodID = parseInt(response.inputID);
-        var query = "SELECT stock_quantity FROM products WHERE item_id=" + prodID;
-        var addAmt = parseInt(response.inputAmount);
-        
+        .prompt([{
+            type: "input",
+            name: "inputID",
+            message: "What is the ID of the item?",
+        },
+        {
+            type: "input",
+            name: "inputAmount",
+            message: "How many would you like to add?",
+        },
+        ])
+        .then(function (response) {
+            console.log("Updating inventory...");
+            var prodID = parseInt(response.inputID);
+            var query = "SELECT stock_quantity FROM products WHERE item_id=" + prodID;
+            var addAmt = parseInt(response.inputAmount);
 
-        connection.query(query, function (err, results) {
-            if (err) throw err;
-            var currAmt = parseInt(results[0].stock_quantity);
-            var totalAmt = currAmt + addAmt;
-            updateStockAmt(prodID, totalAmt);
-    
+
+            connection.query(query, function (err, results) {
+                if (err) throw err;
+                var currAmt = parseInt(results[0].stock_quantity);
+                var totalAmt = currAmt + addAmt;
+                updateStockAmt(prodID, totalAmt);
+
+            });
+
         });
-
-    });
 };
 
 function updateStockAmt(id, amt) {
@@ -124,7 +125,48 @@ function updateStockAmt(id, amt) {
         console.log("Stock quantity updated to " + amt);
         initialPrompt();
     });
-}
+};
+
+function addNewItem() {
+    inquirer
+        .prompt([{
+            type: "input",
+            name: "inputName",
+            message: "What is the name of the item?",
+        },
+        {
+            type: "input",
+            name: "inputDpt",
+            message: "What department is the item located?",
+        },
+        {
+            type: "input",
+            name: "inputPrice",
+            message: "What's the price of the item?",
+        },
+        {
+            type: "input",
+            name: "inputStock",
+            message: "How many are in stock?"
+        }
+        ])
+        .then(function (response) {
+            console.log("Adding to inventory...");
+            var name = response.inputName;
+            var department = response.inputDpt;
+            var price = parseFloat(response.inputPrice);
+            var stock = parseInt(response.inputStock);
+            var query = "INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES (? ,? , ?, ?);"
+
+            connection.query(query, [name, department, price, stock], function (err, results) {
+                if (err) throw err;
+                console.log("Updated new item");
+                initialPrompt();
+
+            });
+
+        });
+};
 
 
 
