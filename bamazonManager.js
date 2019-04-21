@@ -9,6 +9,14 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
+var Table = require('cli-table');
+ 
+// instantiate
+var table = new Table({
+    head: ['ID', 'Product Name', 'Department', 'Price', 'Stock']
+  , colWidths: [10, 20, 20, 15, 15]
+});
+
 connection.connect(function (err) {
     if (err) throw err;
     initialPrompt();
@@ -60,11 +68,15 @@ function viewProducts() {
 
     connection.query("SELECT * FROM products", function (err, results) {
         if (err) throw err;
-        console.log("Item ID | Product Name | Price \n");
 
         for (i = 0; i < results.length; i++) {
-            console.log(results[i].item_id + " | " + results[i].product_name + " | " + results[i].department_name + " | " + results[i].price + " | " + results[i].stock_quantity);
+            table.push([results[i].item_id, results[i].product_name, results[i].department_name, results[i].price, results[i].stock_quantity]);
         };
+        console.log(table.toString());
+        table = new Table({
+            head: ['ID', 'Product Name', 'Department', 'Price', 'Stock']
+          , colWidths: [10, 20, 20, 15, 15]
+        });
         initialPrompt();
 
     });
@@ -75,11 +87,15 @@ function viewLowInv() {
 
     connection.query("SELECT * FROM products WHERE stock_quantity < 5", function (err, results) {
         if (err) throw err;
-        console.log("Item ID | Product Name | Price \n");
 
         for (i = 0; i < results.length; i++) {
-            console.log(results[i].item_id + " | " + results[i].product_name + " | " + results[i].department_name + " | " + results[i].price + " | " + results[i].stock_quantity);
+            table.push([results[i].item_id, results[i].product_name, results[i].department_name, results[i].price, results[i].stock_quantity]);
         };
+        console.log(table.toString());
+        table = new Table({
+            head: ['ID', 'Product Name', 'Department', 'Price', 'Stock']
+          , colWidths: [10, 20, 20, 15, 15]
+        });
         initialPrompt();
 
     });
